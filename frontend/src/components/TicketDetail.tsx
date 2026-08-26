@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, CornerDownRight, User, Mail, ChevronLeft } from 'lucide-react';
+import { Clock, CornerDownRight, User, Mail, ChevronLeft, RefreshCw } from 'lucide-react';
 import type { Ticket } from '../types/index';
 import { getPriorityColor, getStatusColor } from '../utils/helpers';
 
@@ -83,20 +83,36 @@ export default function TicketDetail({ ticket, onUpdate, onBack }: Props) {
               No activity recorded yet.
             </div>
           ) : (
-            ticket.notes?.map(note => (
-              <div key={note.id} className="relative flex items-start md:items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-zinc-100 text-zinc-500 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm relative z-10 mt-1 md:mt-0">
-                  <CornerDownRight size={14} />
-                </div>
-                <div className="w-[calc(100%-3.5rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border border-zinc-200 shadow-sm ml-4 md:ml-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1">
-                    <span className="font-semibold text-zinc-900 text-sm">Update</span>
-                    <span className="text-xs text-zinc-400">{new Date(note.createdAt).toLocaleString()}</span>
+            ticket.notes?.map(note => {
+              const match = note.text.match(/^Status updated from ([A-Z_]+) to ([A-Z_]+)(?:\.\n\nNote: ([\s\S]*))?$/);
+              const isSystem = !!match;
+              const newStatus = match ? match[2] : null;
+              const userNote = match ? match[3] : null;
+              
+              const displayContent = isSystem ? (userNote ? userNote : `Changed status to ${newStatus}`) : note.text;
+
+              return (
+                <div key={note.id} className="relative flex items-start md:items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-zinc-100 text-zinc-500 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm relative z-10 mt-1 md:mt-0">
+                    <CornerDownRight size={14} />
                   </div>
-                  <p className="text-zinc-600 text-sm">{note.text}</p>
+                  <div className="w-[calc(100%-3.5rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border border-zinc-200 shadow-sm ml-4 md:ml-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-zinc-900 text-sm">Update</span>
+                        {isSystem && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-zinc-50 text-zinc-500 border-zinc-200 uppercase">
+                            → {newStatus}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-zinc-400">{new Date(note.createdAt).toLocaleString()}</span>
+                    </div>
+                    <p className="text-zinc-600 text-sm whitespace-pre-wrap">{displayContent}</p>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
