@@ -1,4 +1,4 @@
-import { Ticket } from '../types';
+import type { Ticket } from '../types/index';
 
 export const API_BASE_URL = 'http://localhost:3000/api';
 

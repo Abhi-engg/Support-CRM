@@ -1,6 +1,6 @@
 import { Search, Plus, Ticket as TicketIcon, AlertCircle, User } from 'lucide-react';
 import { formatDistanceToNow, differenceInHours } from 'date-fns';
-import { Ticket } from '../types';
+import type { Ticket } from '../types/index';
 import { getStatusColor } from '../utils/helpers';
 
 interface Props {

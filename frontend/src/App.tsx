@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Ticket as TicketIcon } from 'lucide-react';
 import { useTickets } from './hooks/useTickets';
-import { createTicket, updateTicket } from './api';
+import { createTicket, updateTicket } from './api/index';
 
 import TicketSidebar from './components/TicketSidebar';
 import TicketDetail from './components/TicketDetail';

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Clock, CornerDownRight, User, Mail } from 'lucide-react';
-import { Ticket } from '../types';
+import type { Ticket } from '../types/index';
 import { getPriorityColor, getStatusColor } from '../utils/helpers';
 
 interface Props {
