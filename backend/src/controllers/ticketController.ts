@@ -1,12 +1,10 @@
 import { Request, Response } from 'express';
 import prisma from '../prisma';
 
-// 1. Create Ticket
 export const createTicket = async (req: Request, res: Response): Promise<void> => {
   try {
     const { customer_name, customer_email, subject, description, priority } = req.body;
     
-    // Create with a placeholder ticketId first to get the autoincremented ID
     const tempId = `TEMP-${Date.now()}`;
     const ticket = await prisma.ticket.create({
       data: {
@@ -19,7 +17,6 @@ export const createTicket = async (req: Request, res: Response): Promise<void> =
       }
     });
 
-    // Update with the formatted sequential ID (e.g., TKT-001)
     const finalTicketId = `TKT-${ticket.id.toString().padStart(3, '0')}`;
     const updated = await prisma.ticket.update({
       where: { id: ticket.id },
@@ -33,41 +30,28 @@ export const createTicket = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-// 2. List All Tickets (with search & filter)
 export const getTickets = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { status, search } = req.query;
-    const whereClause: any = {};
+    const status = req.query.status as string | undefined;
+    const search = req.query.search as string | undefined;
     
-    if (status) {
-      whereClause.status = status as string;
-    }
-
+    const whereClause: any = {};
+    if (status) whereClause.status = status;
     if (search) {
-      const searchStr = search as string;
       whereClause.OR = [
-        { ticketId: { contains: searchStr, mode: 'insensitive' } },
-        { customerName: { contains: searchStr, mode: 'insensitive' } },
-        { customerEmail: { contains: searchStr, mode: 'insensitive' } },
-        { subject: { contains: searchStr, mode: 'insensitive' } },
-        { description: { contains: searchStr, mode: 'insensitive' } }
+        { ticketId: { contains: search, mode: 'insensitive' } },
+        { customerName: { contains: search, mode: 'insensitive' } },
+        { customerEmail: { contains: search, mode: 'insensitive' } },
+        { subject: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } }
       ];
     }
 
     const tickets = await prisma.ticket.findMany({
       where: whereClause,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        ticketId: true,
-        customerName: true,
-        subject: true,
-        status: true,
-        priority: true,
-        createdAt: true
-      }
+      orderBy: { createdAt: 'desc' }
     });
 
-    // Map to spec format
     res.json(tickets.map(t => ({
       ticket_id: t.ticketId,
       customer_name: t.customerName,
@@ -82,13 +66,12 @@ export const getTickets = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-// 3. View Ticket Details
 export const getTicketById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const ticket = await prisma.ticket.findUnique({
       where: { ticketId: id },
-      include: { notes: { orderBy: { createdAt: 'asc' } } }
+      include: { notes: true }
     });
 
     if (!ticket) {
@@ -96,7 +79,6 @@ export const getTicketById = async (req: Request, res: Response): Promise<void> 
       return;
     }
     
-    // Format response to match spec
     res.json({
       ticket_id: ticket.ticketId,
       customer_name: ticket.customerName,
@@ -109,15 +91,14 @@ export const getTicketById = async (req: Request, res: Response): Promise<void> 
       notes: ticket.notes
     });
   } catch (error) {
-    console.error('Error fetching ticket details:', error);
+    console.error('Error fetching ticket:', error);
     res.status(500).json({ error: 'Failed to fetch ticket' });
   }
 };
 
-// 4. Update Ticket (Status, Priority, add Note)
 export const updateTicket = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { status, priority, notes } = req.body;
 
     const ticket = await prisma.ticket.findUnique({ where: { ticketId: id } });
