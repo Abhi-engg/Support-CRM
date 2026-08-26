@@ -38,12 +38,18 @@ export const getTickets = async (req: Request, res: Response): Promise<void> => 
     const whereClause: any = {};
     if (status) whereClause.status = status;
     if (search) {
+      const searchLower = search.toLowerCase();
       whereClause.OR = [
         { ticketId: { contains: search, mode: 'insensitive' } },
         { customerName: { contains: search, mode: 'insensitive' } },
         { customerEmail: { contains: search, mode: 'insensitive' } },
         { subject: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { description: { contains: search, mode: 'insensitive' } },
+        { ticketId: { contains: searchLower } },
+        { customerName: { contains: searchLower } },
+        { customerEmail: { contains: searchLower } },
+        { subject: { contains: searchLower } },
+        { description: { contains: searchLower } }
       ];
     }
 
