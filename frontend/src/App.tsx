@@ -27,6 +27,11 @@ export default function App() {
     setActiveTicketId(null);
   };
 
+  const handleBackToQueue = () => {
+    setActiveTicketId(null);
+    setIsCreating(false);
+  };
+
   const handleCreateSubmit = async (data: any) => {
     try {
       const newTicket = await createTicket(data);
@@ -48,6 +53,8 @@ export default function App() {
     }
   };
 
+  const hasActiveView = activeTicketId !== null || isCreating;
+
   return (
     <div className="flex h-screen bg-zinc-50 text-zinc-900 overflow-hidden font-sans selection:bg-zinc-200">
       <TicketSidebar 
@@ -60,15 +67,16 @@ export default function App() {
         isCreating={isCreating}
         onSelectTicket={handleSelectTicket}
         onCreateNew={handleCreateNew}
+        hiddenOnMobile={hasActiveView}
       />
 
-      <div className="flex-1 bg-white relative z-0 overflow-y-auto">
+      <div className={`flex-1 bg-white relative z-0 overflow-y-auto ${!hasActiveView ? 'hidden md:block' : 'block'}`}>
         {isCreating ? (
-          <CreateTicketForm onSubmit={handleCreateSubmit} />
+          <CreateTicketForm onSubmit={handleCreateSubmit} onBack={handleBackToQueue} />
         ) : activeTicketData && activeTicketId === activeTicketData.ticket_id ? (
-          <TicketDetail ticket={activeTicketData} onUpdate={handleUpdateSubmit} />
+          <TicketDetail ticket={activeTicketData} onUpdate={handleUpdateSubmit} onBack={handleBackToQueue} />
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-zinc-400">
+          <div className="hidden md:flex h-full flex-col items-center justify-center text-zinc-400">
             <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mb-4 border border-zinc-100">
               <TicketIcon size={32} className="text-zinc-300" />
             </div>

@@ -107,14 +107,20 @@ export const updateTicket = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    let finalNoteText = notes;
+    if (status && status !== ticket.status) {
+      const statusMsg = `Status updated from ${ticket.status} to ${status}`;
+      finalNoteText = notes ? `${statusMsg}.\n\nNote: ${notes}` : statusMsg;
+    }
+
     const updated = await prisma.ticket.update({
       where: { ticketId: id },
       data: {
         ...(status && { status }),
         ...(priority && { priority }),
-        ...(notes && {
+        ...(finalNoteText && {
           notes: {
-            create: { text: notes }
+            create: { text: finalNoteText }
           }
         })
       }

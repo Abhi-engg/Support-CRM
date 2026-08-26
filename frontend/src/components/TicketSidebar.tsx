@@ -13,12 +13,13 @@ interface Props {
   isCreating: boolean;
   onSelectTicket: (id: string) => void;
   onCreateNew: () => void;
+  hiddenOnMobile: boolean;
 }
 
-export default function TicketSidebar({ tickets, search, setSearch, statusFilter, setStatusFilter, activeTicketId, isCreating, onSelectTicket, onCreateNew }: Props) {
+export default function TicketSidebar({ tickets, search, setSearch, statusFilter, setStatusFilter, activeTicketId, isCreating, onSelectTicket, onCreateNew, hiddenOnMobile }: Props) {
   return (
-    <div className="w-[420px] flex flex-col border-r border-zinc-200 bg-zinc-50/80 backdrop-blur-xl shrink-0 z-10 shadow-[1px_0_10px_rgba(0,0,0,0.02)]">
-      <div className="p-6 pb-4">
+    <div className={`w-full md:w-[420px] flex-col border-r border-zinc-200 bg-zinc-50/80 backdrop-blur-xl shrink-0 z-10 shadow-[1px_0_10px_rgba(0,0,0,0.02)] ${hiddenOnMobile ? 'hidden md:flex' : 'flex'}`}>
+      <div className="p-4 md:p-6 pb-4">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
@@ -30,7 +31,7 @@ export default function TicketSidebar({ tickets, search, setSearch, statusFilter
             onClick={onCreateNew}
             className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-zinc-800 transition-all shadow-sm active:scale-95"
           >
-            <Plus size={16} /> New Ticket
+            <Plus size={16} /> <span className="hidden sm:inline">New Ticket</span><span className="sm:hidden">New</span>
           </button>
         </div>
 
@@ -48,7 +49,7 @@ export default function TicketSidebar({ tickets, search, setSearch, statusFilter
           <select 
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="bg-white border border-zinc-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-900 shadow-sm transition-all"
+            className="bg-white border border-zinc-200 rounded-lg text-sm px-2 md:px-3 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-900 shadow-sm transition-all"
           >
             <option value="">All Status</option>
             <option value="OPEN">Open</option>
