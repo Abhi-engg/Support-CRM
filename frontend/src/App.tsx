@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Ticket as TicketIcon } from 'lucide-react';
+import { Ticket as TicketIcon, Loader2 } from 'lucide-react';
 import { useTickets } from './hooks/useTickets';
 import { createTicket, updateTicket } from './api/index';
 
@@ -10,15 +10,21 @@ import CreateTicketForm from './components/CreateTicketForm';
 export default function App() {
   const { 
     tickets, search, setSearch, statusFilter, setStatusFilter,
-    activeTicketData, loadTickets, loadActiveTicket
+    activeTicketData, setActiveTicketData, isLoading, isLoadingTicket, loadTickets, loadActiveTicket
   } = useTickets();
 
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSelectTicket = (id: string) => {
     setActiveTicketId(id);
     setIsCreating(false);
+    
+    // Optimistic Cache Lifting: Instantly show the ticket details using the basic info from the list
+    const cached = tickets.find(t => t.ticket_id === id);
+    if (cached) setActiveTicketData(cached as any);
+    
     loadActiveTicket(id);
   };
 
@@ -33,6 +39,7 @@ export default function App() {
   };
 
   const handleCreateSubmit = async (data: any) => {
+    setIsSubmitting(true);
     try {
       const newTicket = await createTicket(data);
       setIsCreating(false);
@@ -40,16 +47,21 @@ export default function App() {
       loadTickets();
     } catch (err) {
       console.error('Failed to create ticket', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleUpdateSubmit = async (id: string, updates: any) => {
+    setIsSubmitting(true);
     try {
       await updateTicket(id, updates);
       loadActiveTicket(id);
       loadTickets();
     } catch (err) {
       console.error('Failed to update ticket', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -65,6 +77,7 @@ export default function App() {
         setStatusFilter={setStatusFilter}
         activeTicketId={activeTicketId}
         isCreating={isCreating}
+        isLoading={isLoading}
         onSelectTicket={handleSelectTicket}
         onCreateNew={handleCreateNew}
         hiddenOnMobile={hasActiveView}
@@ -72,9 +85,9 @@ export default function App() {
 
       <div className={`flex-1 bg-white relative z-0 overflow-y-auto ${!hasActiveView ? 'hidden md:block' : 'block'}`}>
         {isCreating ? (
-          <CreateTicketForm onSubmit={handleCreateSubmit} onBack={handleBackToQueue} />
+          <CreateTicketForm isSubmitting={isSubmitting} onSubmit={handleCreateSubmit} onBack={handleBackToQueue} />
         ) : activeTicketData && activeTicketId === activeTicketData.ticket_id ? (
-          <TicketDetail ticket={activeTicketData} onUpdate={handleUpdateSubmit} onBack={handleBackToQueue} />
+          <TicketDetail ticket={activeTicketData} isSubmitting={isSubmitting} isLoadingNotes={isLoadingTicket} onUpdate={handleUpdateSubmit} onBack={handleBackToQueue} />
         ) : (
           <div className="hidden md:flex h-full flex-col items-center justify-center text-zinc-400">
             <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mb-4 border border-zinc-100">

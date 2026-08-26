@@ -1,21 +1,25 @@
 import { useState, useEffect } from 'react';
-import { Clock, CornerDownRight, User, Mail, ChevronLeft, RefreshCw } from 'lucide-react';
+import { Clock, CornerDownRight, User, Mail, ChevronLeft, Loader2, Copy, Check } from 'lucide-react';
 import type { Ticket } from '../types/index';
 import { getPriorityColor, getStatusColor } from '../utils/helpers';
 
 interface Props {
   ticket: Ticket;
+  isSubmitting: boolean;
+  isLoadingNotes: boolean;
   onUpdate: (id: string, updates: any) => Promise<void>;
   onBack: () => void;
 }
 
-export default function TicketDetail({ ticket, onUpdate, onBack }: Props) {
+export default function TicketDetail({ ticket, isSubmitting, isLoadingNotes, onUpdate, onBack }: Props) {
   const [newNote, setNewNote] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState<string>(ticket.status);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setUpdatingStatus(ticket.status);
     setNewNote('');
+    setCopied(false);
   }, [ticket.ticket_id]);
 
   const handleSave = async () => {
@@ -38,7 +42,23 @@ export default function TicketDetail({ ticket, onUpdate, onBack }: Props) {
 
       <div className="mb-8 md:mb-10 pb-6 md:pb-8 border-b border-zinc-100">
         <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-4">
-          <span className="text-sm font-semibold text-zinc-500">{ticket.ticket_id}</span>
+          <button 
+            onClick={() => {
+              navigator.clipboard.writeText(ticket.ticket_id);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            className="group flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors px-1.5 py-0.5 -ml-1.5 rounded-md hover:bg-zinc-100 active:scale-95"
+            title="Copy Ticket ID"
+          >
+            {ticket.ticket_id}
+            {copied ? (
+              <Check size={14} className="text-emerald-500" />
+            ) : (
+              <Copy size={14} className="text-zinc-300 group-hover:text-zinc-500 transition-colors" />
+            )}
+          </button>
+          
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${getPriorityColor(ticket.priority)}`}>
             {ticket.priority} PRIORITY
           </span>
@@ -78,7 +98,11 @@ export default function TicketDetail({ ticket, onUpdate, onBack }: Props) {
         </h3>
         
         <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-zinc-200 before:to-transparent">
-          {ticket.notes?.length === 0 ? (
+          {isLoadingNotes ? (
+            <div className="flex justify-center items-center py-8 text-zinc-400 relative z-10">
+              <Loader2 className="animate-spin" size={24} />
+            </div>
+          ) : ticket.notes?.length === 0 ? (
             <div className="text-center p-6 bg-zinc-50 rounded-xl border border-dashed border-zinc-200 text-zinc-500 text-sm">
               No activity recorded yet.
             </div>
@@ -127,7 +151,8 @@ export default function TicketDetail({ ticket, onUpdate, onBack }: Props) {
             placeholder="Type an internal note or update..."
             value={newNote}
             onChange={e => setNewNote(e.target.value)}
-            className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all resize-none mb-4"
+            disabled={isSubmitting}
+            className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all resize-none mb-4 disabled:opacity-50"
           ></textarea>
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
@@ -136,7 +161,8 @@ export default function TicketDetail({ ticket, onUpdate, onBack }: Props) {
               <select 
                 value={updatingStatus}
                 onChange={e => setUpdatingStatus(e.target.value)}
-                className="bg-transparent text-sm font-medium text-zinc-900 focus:outline-none cursor-pointer w-full"
+                disabled={isSubmitting}
+                className="bg-transparent text-sm font-medium text-zinc-900 focus:outline-none cursor-pointer w-full disabled:opacity-50"
               >
                 <option value="OPEN">Open</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -146,9 +172,11 @@ export default function TicketDetail({ ticket, onUpdate, onBack }: Props) {
             
             <button 
               onClick={handleSave}
-              className="bg-zinc-900 text-white px-5 py-2.5 sm:py-2 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-all shadow-sm active:scale-95"
+              disabled={isSubmitting}
+              className="flex justify-center items-center gap-2 bg-zinc-900 text-white px-5 py-2.5 sm:py-2 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             >
-              Save Changes
+              {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : null}
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </div>

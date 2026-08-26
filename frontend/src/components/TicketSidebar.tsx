@@ -1,4 +1,4 @@
-import { Search, Plus, Ticket as TicketIcon, AlertCircle, User } from 'lucide-react';
+import { Search, Plus, Ticket as TicketIcon, AlertCircle, User, Loader2 } from 'lucide-react';
 import { formatDistanceToNow, differenceInHours } from 'date-fns';
 import type { Ticket } from '../types/index';
 import { getStatusColor } from '../utils/helpers';
@@ -11,12 +11,13 @@ interface Props {
   setStatusFilter: (s: string) => void;
   activeTicketId: string | null;
   isCreating: boolean;
+  isLoading: boolean;
   onSelectTicket: (id: string) => void;
   onCreateNew: () => void;
   hiddenOnMobile: boolean;
 }
 
-export default function TicketSidebar({ tickets, search, setSearch, statusFilter, setStatusFilter, activeTicketId, isCreating, onSelectTicket, onCreateNew, hiddenOnMobile }: Props) {
+export default function TicketSidebar({ tickets, search, setSearch, statusFilter, setStatusFilter, activeTicketId, isCreating, isLoading, onSelectTicket, onCreateNew, hiddenOnMobile }: Props) {
   return (
     <div className={`w-full md:w-[420px] flex-col border-r border-zinc-200 bg-zinc-50/80 backdrop-blur-xl shrink-0 z-10 shadow-[1px_0_10px_rgba(0,0,0,0.02)] ${hiddenOnMobile ? 'hidden md:flex' : 'flex'}`}>
       <div className="p-4 md:p-6 pb-4">
@@ -59,14 +60,19 @@ export default function TicketSidebar({ tickets, search, setSearch, statusFilter
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-3 pt-2">
-        {tickets.length === 0 ? (
+      <div className="flex-1 overflow-y-auto px-4 pb-6 pt-2">
+        {isLoading && tickets.length === 0 ? (
+          <div className="flex justify-center items-center h-32 text-zinc-400">
+            <Loader2 className="animate-spin" size={24} />
+          </div>
+        ) : tickets.length === 0 ? (
           <div className="text-center mt-12 text-zinc-400 text-sm flex flex-col items-center gap-2">
             <Search size={24} className="opacity-20" />
             <p>No tickets found in this view.</p>
           </div>
         ) : (
-          tickets.map(ticket => {
+          <div className={`space-y-3 transition-opacity duration-200 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+            {tickets.map(ticket => {
             const isOverdue = ticket.status === 'OPEN' && differenceInHours(new Date(), new Date(ticket.created_at)) > 24;
             const isActive = activeTicketId === ticket.ticket_id && !isCreating;
 
@@ -111,7 +117,8 @@ export default function TicketSidebar({ tickets, search, setSearch, statusFilter
                 </div>
               </div>
             );
-          })
+          })}
+          </div>
         )}
       </div>
     </div>

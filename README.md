@@ -1,50 +1,95 @@
 # Datastraw Support CRM
 
-A full-stack customer support ticketing system built for the Datastraw Technologies hiring assignment. Designed with an intentional "Thermal Triage" brutalist aesthetic to stand out, optimizing for high-density information scanning and strict visual structure.
+A modern, full-stack Customer Support Ticketing System built for high-volume support teams. Designed to handle hundreds of tickets efficiently with a split-pane triage interface, real-time SLA breach detection, and a horizontally scalable backend architecture.
 
-## Features (Core)
-* **Create Ticket**: Open new support records with auto-generated sequential IDs (e.g., `TKT-001`).
-* **List Tickets**: A fast, filterable queue layout.
-* **Search & Filter**: Real-time debounced search across names, emails, and subjects, with status filtering.
-* **View & Update**: A detailed right-pane view with a chronological Activity Log for notes and status updates.
+## 🚀 Core Features
 
-## Features (Stand-Out)
-* **Priority Levels**: Triage tickets by `LOW`, `MEDIUM`, `HIGH`, or `URGENT` priority. 
-* **SLA Overdue Flagging**: Tickets that remain `OPEN` for more than 24 hours receive an aggressive visual stamp (`SLA BREACH`) to immediately draw agent attention.
+1. **Create Tickets:** Capture customer details, issues, and priority levels.
+2. **High-Volume Queue:** A highly scannable, color-coded list view designed to eliminate "pogo-sticking" (page reloads) during active triage.
+3. **Advanced Search & Filtering:** Case-insensitive, debounced search across names, emails, subjects, and descriptions, alongside status filtering.
+4. **Activity Timeline:** A beautiful, chronological timeline that automatically tracks both user notes and system status changes.
+5. **Responsive Design:** Intelligently switches from a high-efficiency split-pane on desktop to a native-feeling stacked navigation on mobile devices.
 
-## Tech Stack
-* **Frontend**: React, TypeScript, Vite, Tailwind CSS v4, Lucide Icons.
-* **Backend**: Node.js, Express, TypeScript.
-* **Database**: PostgreSQL (Hosted on Neon) + Prisma ORM.
+## ✨ "Stand Out" Bonus Features
+To ensure this CRM is genuinely useful for a real support team, the following features were added beyond the core requirements:
+* **SLA Breach Detection:** Tickets left `OPEN` for > 24 hours are automatically flagged with a critical red border and SLA badge, allowing agents to instantly triage the most urgent issues.
+* **Intelligent System Notes:** When an agent changes a ticket's status, the backend actively intercepts the event and embeds a sleek status badge directly into the timeline, matching premium issue trackers like Linear or Jira.
+* **Debounced API Calls:** The frontend search input waits 300ms after the user stops typing before hitting the backend, drastically reducing database load.
 
-## Setup Instructions
+---
 
-### 1. Database Configuration
-This project uses a hosted Neon PostgreSQL database, meaning no local Docker or Postgres installation is required.
-1. Create a `.env` file in the `backend/` directory (you can copy `.env.example`).
-2. Add your Neon connection string: `DATABASE_URL="postgresql://user:pass@host/neondb?sslmode=require"`
+## 🏗️ Architecture & Scalability
 
-### 2. Backend Setup
+This application was designed with production-level scalability in mind.
+
+* **Stateless API:** The Node.js/Express backend stores zero session state in local memory. This means it is natively ready to be placed behind a Load Balancer (Nginx, AWS ALB) for infinite horizontal scaling.
+* **Serverless Database:** Powered by Neon Postgres, which automatically scales compute resources based on traffic load.
+* **Connection Pooling:** Prisma ORM safely multiplexes database queries, ensuring that sudden traffic spikes do not exhaust the Postgres connection limit.
+
+```mermaid
+graph TD
+    Client[React Frontend / CDN] -->|API Requests| LB[Load Balancer]
+    
+    subgraph Stateless Backend Cluster
+    LB -->|Distributes Load| Node1[Express Server 1]
+    LB -->|Distributes Load| Node2[Express Server 2]
+    LB -->|Distributes Load| Node3[Express Server 3]
+    end
+
+    Node1 -->|Connection Pool| DB[(Neon Serverless Postgres)]
+    Node2 -->|Connection Pool| DB
+    Node3 -->|Connection Pool| DB
+```
+
+---
+
+## 💻 Tech Stack
+
+**Frontend:**
+* React 18 (Vite)
+* TypeScript
+* Tailwind CSS v4 (Modern SaaS UI)
+* Lucide React (Icons)
+
+**Backend:**
+* Node.js & Express
+* TypeScript
+* Prisma ORM (v5)
+* PostgreSQL (Neon Serverless DB)
+
+---
+
+## 🛠️ Local Development Setup
+
+### Prerequisites
+* Node.js (v18+)
+* A PostgreSQL Database URL (Neon recommended)
+
+### 1. Backend Setup
 ```bash
 cd backend
 npm install
-npx prisma migrate dev --name init  # Syncs schema to Neon
-npm run dev                         # Starts server on localhost:3000
+
+# Setup Environment Variables
+# Create a .env file and add your Neon Postgres URL:
+# DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
+
+# Sync database schema and seed mock data
+npx prisma db push
+npm run seed
+
+# Start the server (runs on http://localhost:3000)
+npm run dev
 ```
 
-### 3. Frontend Setup (in a new terminal)
+### 2. Frontend Setup
 ```bash
 cd frontend
 npm install
-npm run dev                         # Starts app on localhost:5174
+
+# Start the Vite development server (runs on http://localhost:5174)
+npm run dev
 ```
 
-### Optional: Seed Mock Data
-To populate the database with realistic sample tickets (including an SLA Breach ticket to test the standout feature):
-```bash
-cd backend
-npx ts-node seed.ts
-```
-
-## Design Notes ("Thermal Triage")
-The UI deliberately avoids generic SaaS templates. Support agents look at queues all day, so the aesthetic is grounded in physical triage: thermal paper receipts, ink stamps, and high-contrast 1px borders. `Inter` is reserved for human-authored content, while `Space Mono` is strictly applied to system-generated metadata (IDs, Timestamps, Priorities). The SLA Overdue flag is implemented as a physical red "stamp" that purposefully breaks the grid alignment to communicate urgency.
+---
+*Designed and built for the Datastraw Technologies Engineering Assessment.*

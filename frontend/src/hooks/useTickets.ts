@@ -7,6 +7,9 @@ export function useTickets() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [activeTicketData, setActiveTicketData] = useState<Ticket | null>(null);
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingTicket, setIsLoadingTicket] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -16,20 +19,26 @@ export function useTickets() {
   }, [search, statusFilter]);
 
   const loadTickets = async () => {
+    setIsLoading(true);
     try {
       const data = await fetchTickets(search, statusFilter);
       setTickets(data);
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const loadActiveTicket = async (id: string) => {
+    setIsLoadingTicket(true);
     try {
       const data = await fetchTicket(id);
       setActiveTicketData(data);
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoadingTicket(false);
     }
   };
 
@@ -41,6 +50,8 @@ export function useTickets() {
     setStatusFilter,
     activeTicketData, 
     setActiveTicketData,
+    isLoading,
+    isLoadingTicket,
     loadTickets, 
     loadActiveTicket
   };

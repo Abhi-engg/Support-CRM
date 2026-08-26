@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Loader2 } from 'lucide-react';
 
 interface Props {
+  isSubmitting: boolean;
   onSubmit: (data: any) => Promise<void>;
   onBack: () => void;
 }
 
-export default function CreateTicketForm({ onSubmit, onBack }: Props) {
+export default function CreateTicketForm({ isSubmitting, onSubmit, onBack }: Props) {
   const [createData, setCreateData] = useState({
     customer_name: '',
     customer_email: '',
@@ -41,16 +42,16 @@ export default function CreateTicketForm({ onSubmit, onBack }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-700">Customer Name</label>
-            <input required type="text" placeholder="Jane Doe" value={createData.customer_name} onChange={e => setCreateData({...createData, customer_name: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm" />
+            <input required disabled={isSubmitting} type="text" placeholder="Jane Doe" value={createData.customer_name} onChange={e => setCreateData({...createData, customer_name: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm disabled:opacity-50" />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-700">Email Address</label>
-            <input required type="email" placeholder="jane@example.com" value={createData.customer_email} onChange={e => setCreateData({...createData, customer_email: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm" />
+            <input required disabled={isSubmitting} type="email" placeholder="jane@example.com" value={createData.customer_email} onChange={e => setCreateData({...createData, customer_email: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm disabled:opacity-50" />
           </div>
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium text-zinc-700">Priority Level</label>
-          <select value={createData.priority} onChange={e => setCreateData({...createData, priority: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm">
+          <select disabled={isSubmitting} value={createData.priority} onChange={e => setCreateData({...createData, priority: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm disabled:opacity-50">
             <option value="LOW">Low</option>
             <option value="MEDIUM">Medium</option>
             <option value="HIGH">High</option>
@@ -59,16 +60,17 @@ export default function CreateTicketForm({ onSubmit, onBack }: Props) {
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium text-zinc-700">Subject</label>
-          <input required type="text" placeholder="Brief summary of the issue" value={createData.subject} onChange={e => setCreateData({...createData, subject: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm" />
+          <input required disabled={isSubmitting} type="text" placeholder="Brief summary of the issue" value={createData.subject} onChange={e => setCreateData({...createData, subject: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm disabled:opacity-50" />
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium text-zinc-700">Description</label>
-          <textarea required rows={5} placeholder="Provide as much detail as possible..." value={createData.description} onChange={e => setCreateData({...createData, description: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm resize-none"></textarea>
+          <textarea required disabled={isSubmitting} rows={5} placeholder="Provide as much detail as possible..." value={createData.description} onChange={e => setCreateData({...createData, description: e.target.value})} className="w-full bg-white border border-zinc-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-sm resize-none disabled:opacity-50"></textarea>
         </div>
         
         <div className="pt-4 flex justify-end">
-          <button type="submit" className="w-full sm:w-auto bg-zinc-900 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-all shadow-sm active:scale-95">
-            Submit Ticket
+          <button type="submit" disabled={isSubmitting} className="flex justify-center items-center gap-2 w-full sm:w-auto bg-zinc-900 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
+            {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : null}
+            {isSubmitting ? 'Submitting...' : 'Submit Ticket'}
           </button>
         </div>
       </form>
