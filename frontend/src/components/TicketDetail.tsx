@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Clock, CornerDownRight, User, Mail, ChevronLeft, Loader2, Copy, Check } from 'lucide-react';
+import { Clock, User, Mail, ChevronLeft, Loader2, Copy, Check, MessageSquare, RefreshCcw } from 'lucide-react';
 import type { Ticket } from '../types/index';
-import { getPriorityColor, getStatusColor } from '../utils/helpers';
+import { getPriorityColor, getStatusColor, formatEnum } from '../utils/helpers';
 
 interface Props {
   ticket: Ticket;
@@ -59,11 +59,11 @@ export default function TicketDetail({ ticket, isSubmitting, isLoadingNotes, onU
             )}
           </button>
           
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${getPriorityColor(ticket.priority)}`}>
-            {ticket.priority} PRIORITY
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wide ${getPriorityColor(ticket.priority)}`}>
+            {formatEnum(ticket.priority)} PRIORITY
           </span>
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${getStatusColor(ticket.status)}`}>
-            STATUS: {ticket.status}
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wide ${getStatusColor(ticket.status)}`}>
+            STATUS: {formatEnum(ticket.status)}
           </span>
         </div>
         
@@ -97,13 +97,13 @@ export default function TicketDetail({ ticket, isSubmitting, isLoadingNotes, onU
           <Clock size={14} /> Activity Timeline
         </h3>
         
-        <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-zinc-200 before:to-transparent">
+        <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-zinc-200 before:to-transparent">
           {isLoadingNotes ? (
             <div className="flex justify-center items-center py-8 text-zinc-400 relative z-10">
               <Loader2 className="animate-spin" size={24} />
             </div>
           ) : ticket.notes?.length === 0 ? (
-            <div className="text-center p-6 bg-zinc-50 rounded-xl border border-dashed border-zinc-200 text-zinc-500 text-sm">
+            <div className="text-center p-6 bg-zinc-50 rounded-xl border border-dashed border-zinc-200 text-zinc-500 text-sm ml-12">
               No activity recorded yet.
             </div>
           ) : (
@@ -113,20 +113,22 @@ export default function TicketDetail({ ticket, isSubmitting, isLoadingNotes, onU
               const newStatus = match ? match[2] : null;
               const userNote = match ? match[3] : null;
               
-              const displayContent = isSystem ? (userNote ? userNote : `Changed status to ${newStatus}`) : note.text;
+              const displayContent = isSystem ? (userNote ? userNote : `Changed status to ${formatEnum(newStatus as string)}`) : note.text;
+              const Icon = isSystem ? RefreshCcw : MessageSquare;
+              const titleLabel = isSystem ? 'Status Change' : 'Internal Note';
 
               return (
-                <div key={note.id} className="relative flex items-start md:items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-zinc-100 text-zinc-500 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm relative z-10 mt-1 md:mt-0">
-                    <CornerDownRight size={14} />
+                <div key={note.id} className="relative flex items-start group is-active">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-zinc-100 text-zinc-500 shrink-0 shadow-sm relative z-10 mt-1">
+                    <Icon size={14} />
                   </div>
-                  <div className="w-[calc(100%-3.5rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border border-zinc-200 shadow-sm ml-4 md:ml-0">
+                  <div className="w-[calc(100%-3.5rem)] bg-white p-4 rounded-xl border border-zinc-200 shadow-sm ml-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-zinc-900 text-sm">Update</span>
+                        <span className="font-semibold text-zinc-900 text-sm">{titleLabel}</span>
                         {isSystem && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-zinc-50 text-zinc-500 border-zinc-200 uppercase">
-                            → {newStatus}
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-zinc-50 text-zinc-500 border-zinc-200 uppercase tracking-wide">
+                            → {formatEnum(newStatus as string)}
                           </span>
                         )}
                       </div>

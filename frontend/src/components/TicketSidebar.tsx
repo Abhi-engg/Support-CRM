@@ -1,7 +1,7 @@
 import { Search, Plus, Ticket as TicketIcon, AlertCircle, User, Loader2 } from 'lucide-react';
 import { formatDistanceToNow, differenceInHours } from 'date-fns';
 import type { Ticket } from '../types/index';
-import { getStatusColor } from '../utils/helpers';
+import { getStatusColor, getPriorityDotColor, formatEnum } from '../utils/helpers';
 
 interface Props {
   tickets: Ticket[];
@@ -61,6 +61,10 @@ export default function TicketSidebar({ tickets, search, setSearch, statusFilter
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-6 pt-2">
+        <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-1 mb-3">
+          Queue ({tickets.length})
+        </div>
+        
         {isLoading && tickets.length === 0 ? (
           <div className="flex justify-center items-center h-32 text-zinc-400">
             <Loader2 className="animate-spin" size={24} />
@@ -81,8 +85,8 @@ export default function TicketSidebar({ tickets, search, setSearch, statusFilter
                 key={ticket.ticket_id}
                 onClick={() => onSelectTicket(ticket.ticket_id)}
                 className={`
-                  group p-4 rounded-xl border bg-white cursor-pointer transition-all relative overflow-hidden shadow-sm
-                  ${isActive ? 'ring-2 ring-zinc-900 border-transparent shadow-md' : 'border-zinc-200 hover:border-zinc-300 hover:shadow-md'}
+                  group p-4 rounded-xl border cursor-pointer transition-all relative overflow-hidden
+                  ${isActive ? 'ring-2 ring-zinc-900 border-transparent shadow-md bg-zinc-50' : 'border-zinc-200 hover:border-zinc-300 hover:shadow-md bg-white'}
                 `}
               >
                 {isOverdue && (
@@ -98,20 +102,23 @@ export default function TicketSidebar({ tickets, search, setSearch, statusFilter
                 
                 <div className="flex justify-between items-center pl-1">
                   <div className="flex items-center gap-1.5 overflow-hidden">
-                    <div className="w-5 h-5 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-zinc-200/50 flex items-center justify-center shrink-0">
                       <User size={10} className="text-zinc-500" />
                     </div>
                     <span className="text-xs text-zinc-600 truncate max-w-[100px]">{ticket.customer_name}</span>
                   </div>
                   
                   <div className="flex gap-2 items-center shrink-0">
+                    <div className="flex items-center justify-center pr-1" title={`${formatEnum(ticket.priority)} Priority`}>
+                      <div className={`w-2 h-2 rounded-full ${getPriorityDotColor(ticket.priority)}`}></div>
+                    </div>
                     {isOverdue && (
                       <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md border border-red-100 uppercase">
                         <AlertCircle size={10} /> SLA
                       </span>
                     )}
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${getStatusColor(ticket.status)}`}>
-                      {ticket.status}
+                      {formatEnum(ticket.status)}
                     </span>
                   </div>
                 </div>

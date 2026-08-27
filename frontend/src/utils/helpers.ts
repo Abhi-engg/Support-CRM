@@ -16,3 +16,18 @@ export const getPriorityColor = (priority: string) => {
     default: return 'bg-zinc-100 text-zinc-700 border-zinc-300';
   }
 };
+
+export const getPriorityDotColor = (priority: string) => {
+  switch(priority) {
+    case 'URGENT': return 'bg-red-500';
+    case 'HIGH': return 'bg-orange-500';
+    case 'MEDIUM': return 'bg-amber-500';
+    case 'LOW': return 'bg-zinc-400';
+    default: return 'bg-zinc-400';
+  }
+};
+
+export const formatEnum = (val: string) => {
+  if (!val) return '';
+  return val.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
+};
