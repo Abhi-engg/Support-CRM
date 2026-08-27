@@ -112,11 +112,6 @@ export default function TicketSidebar({ tickets, search, setSearch, statusFilter
                     <div className="flex items-center justify-center pr-1" title={`${formatEnum(ticket.priority)} Priority`}>
                       <div className={`w-2 h-2 rounded-full ${getPriorityDotColor(ticket.priority)}`}></div>
                     </div>
-                    {isOverdue && (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md border border-red-100 uppercase">
-                        <AlertCircle size={10} /> SLA
-                      </span>
-                    )}
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${getStatusColor(ticket.status)}`}>
                       {formatEnum(ticket.status)}
                     </span>

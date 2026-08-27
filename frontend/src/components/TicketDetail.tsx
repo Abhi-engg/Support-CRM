@@ -122,7 +122,7 @@ export default function TicketDetail({ ticket, isSubmitting, isLoadingNotes, onU
               const newStatus = match ? match[2] : null;
               const userNote = match ? match[3] : null;
               
-              const displayContent = isSystem ? (userNote ? userNote : `Changed status from ${formatEnum(oldStatus as string)} to ${formatEnum(newStatus as string)}`) : note.text;
+              const displayContent = isSystem ? userNote : note.text;
               const Icon = isSystem ? RefreshCcw : MessageSquare;
               const titleLabel = isSystem ? 'Status Change' : 'Internal Note';
 
@@ -135,7 +135,7 @@ export default function TicketDetail({ ticket, isSubmitting, isLoadingNotes, onU
                     <Icon size={14} />
                   </div>
                   <div className="w-[calc(100%-3.5rem)] bg-white p-4 rounded-xl border border-zinc-200 shadow-sm ml-4 relative z-10">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-zinc-900 text-sm">{titleLabel}</span>
                         {isSystem && (
@@ -146,7 +146,7 @@ export default function TicketDetail({ ticket, isSubmitting, isLoadingNotes, onU
                       </div>
                       <span className="text-xs text-zinc-400">{new Date(note.createdAt).toLocaleString()}</span>
                     </div>
-                    <p className="text-zinc-600 text-sm whitespace-pre-wrap">{displayContent}</p>
+                    {displayContent && <p className="text-zinc-600 text-sm whitespace-pre-wrap mt-3">{displayContent}</p>}
                   </div>
                 </div>
               );
