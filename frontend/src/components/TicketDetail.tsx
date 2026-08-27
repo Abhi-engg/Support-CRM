@@ -14,7 +14,7 @@ interface Props {
 
 export default function TicketDetail({ ticket, isSubmitting, isLoadingNotes, onUpdate, onBack }: Props) {
   const [newNote, setNewNote] = useState('');
-  const [updatingStatus, setUpdatingStatus] = useState(ticket.status);
+  const [updatingStatus, setUpdatingStatus] = useState<string>(ticket.status);
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Sync state if ticket changes (e.g., selecting a new ticket from sidebar)
