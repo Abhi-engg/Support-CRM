@@ -21,7 +21,7 @@ export const getTickets = async (req: Request, res: Response, next: NextFunction
     res.json(tickets.map(t => ({
       ticket_id: t.ticketId,
       customer_name: t.customerName,
-      subject: t.subject,
+      subject: t.sub                                                                                                                                                      ject,
       status: t.status,
       priority: t.priority,
       created_at: t.createdAt

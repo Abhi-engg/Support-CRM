@@ -1,6 +1,6 @@
 import type { Ticket } from '../types/index';
 
-export const API_BASE_URL = 'http://localhost:3000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export const fetchTickets = async (search?: string, status?: string): Promise<Ticket[]> => {
   const params = new URLSearchParams();
