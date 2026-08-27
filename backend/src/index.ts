@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import ticketRoutes from './routes/ticketRoutes';
+import { errorHandler } from './middlewares/errorHandler';
 
 dotenv.config();
 
@@ -18,6 +19,9 @@ app.use('/api/tickets', ticketRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
+
+// Centralized error handler
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

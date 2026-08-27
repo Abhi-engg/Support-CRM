@@ -1,63 +1,23 @@
-import { Request, Response } from 'express';
-import prisma from '../prisma';
+import { Request, Response, NextFunction } from 'express';
+import * as ticketService from '../services/ticketService';
+import { createTicketSchema, updateTicketSchema } from '../schemas/ticketSchemas';
 
-export const createTicket = async (req: Request, res: Response): Promise<void> => {
+export const createTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { customer_name, customer_email, subject, description, priority } = req.body;
-    
-    const tempId = `TEMP-${Date.now()}`;
-    const ticket = await prisma.ticket.create({
-      data: {
-        ticketId: tempId,
-        customerName: customer_name,
-        customerEmail: customer_email,
-        subject,
-        description,
-        priority: priority || 'MEDIUM',
-      }
-    });
-
-    const finalTicketId = `TKT-${ticket.id.toString().padStart(3, '0')}`;
-    const updated = await prisma.ticket.update({
-      where: { id: ticket.id },
-      data: { ticketId: finalTicketId }
-    });
-
-    res.status(201).json({ ticket_id: updated.ticketId, created_at: updated.createdAt });
+    const validData = createTicketSchema.parse(req.body);
+    const ticket = await ticketService.createTicket(validData);
+    res.status(201).json({ ticket_id: ticket.ticketId, created_at: ticket.createdAt });
   } catch (error) {
-    console.error('Error creating ticket:', error);
-    res.status(500).json({ error: 'Failed to create ticket' });
+    next(error);
   }
 };
 
-export const getTickets = async (req: Request, res: Response): Promise<void> => {
+export const getTickets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const status = req.query.status as string | undefined;
     const search = req.query.search as string | undefined;
+    const tickets = await ticketService.getTickets(status, search);
     
-    const whereClause: any = {};
-    if (status) whereClause.status = status;
-    if (search) {
-      const searchLower = search.toLowerCase();
-      whereClause.OR = [
-        { ticketId: { contains: search, mode: 'insensitive' } },
-        { customerName: { contains: search, mode: 'insensitive' } },
-        { customerEmail: { contains: search, mode: 'insensitive' } },
-        { subject: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { ticketId: { contains: searchLower } },
-        { customerName: { contains: searchLower } },
-        { customerEmail: { contains: searchLower } },
-        { subject: { contains: searchLower } },
-        { description: { contains: searchLower } }
-      ];
-    }
-
-    const tickets = await prisma.ticket.findMany({
-      where: whereClause,
-      orderBy: { createdAt: 'desc' }
-    });
-
     res.json(tickets.map(t => ({
       ticket_id: t.ticketId,
       customer_name: t.customerName,
@@ -67,24 +27,13 @@ export const getTickets = async (req: Request, res: Response): Promise<void> => 
       created_at: t.createdAt
     })));
   } catch (error) {
-    console.error('Error fetching tickets:', error);
-    res.status(500).json({ error: 'Failed to fetch tickets' });
+    next(error);
   }
 };
 
-export const getTicketById = async (req: Request, res: Response): Promise<void> => {
+export const getTicketById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const id = req.params.id as string;
-    const ticket = await prisma.ticket.findUnique({
-      where: { ticketId: id },
-      include: { notes: true }
-    });
-
-    if (!ticket) {
-      res.status(404).json({ error: 'Ticket not found' });
-      return;
-    }
-    
+    const ticket = await ticketService.getTicketById(req.params.id as string);
     res.json({
       ticket_id: ticket.ticketId,
       customer_name: ticket.customerName,
@@ -97,44 +46,16 @@ export const getTicketById = async (req: Request, res: Response): Promise<void> 
       notes: ticket.notes
     });
   } catch (error) {
-    console.error('Error fetching ticket:', error);
-    res.status(500).json({ error: 'Failed to fetch ticket' });
+    next(error);
   }
 };
 
-export const updateTicket = async (req: Request, res: Response): Promise<void> => {
+export const updateTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const id = req.params.id as string;
-    const { status, priority, notes } = req.body;
-
-    const ticket = await prisma.ticket.findUnique({ where: { ticketId: id } });
-    if (!ticket) {
-      res.status(404).json({ error: 'Ticket not found' });
-      return;
-    }
-
-    let finalNoteText = notes;
-    if (status && status !== ticket.status) {
-      const statusMsg = `Status updated from ${ticket.status} to ${status}`;
-      finalNoteText = notes ? `${statusMsg}.\n\nNote: ${notes}` : statusMsg;
-    }
-
-    const updated = await prisma.ticket.update({
-      where: { ticketId: id },
-      data: {
-        ...(status && { status }),
-        ...(priority && { priority }),
-        ...(finalNoteText && {
-          notes: {
-            create: { text: finalNoteText }
-          }
-        })
-      }
-    });
-
+    const validData = updateTicketSchema.parse(req.body);
+    const updated = await ticketService.updateTicket(req.params.id as string, validData);
     res.json({ success: true, updated_at: updated.updatedAt });
   } catch (error) {
-    console.error('Error updating ticket:', error);
-    res.status(500).json({ error: 'Failed to update ticket' });
+    next(error);
   }
 };

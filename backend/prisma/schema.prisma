@@ -33,6 +33,10 @@ model Ticket {
   updatedAt     DateTime     @updatedAt
   
   notes         Note[]
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@index([customerEmail])
 }
 
 model Note {
@@ -41,4 +45,7 @@ model Note {
   ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   text      String
   createdAt DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([createdAt(sort: Desc)])
 }
