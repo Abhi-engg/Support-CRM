@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Ticket as TicketIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { SignedIn, SignedOut, SignIn, useAuth } from '@clerk/clerk-react';
 import { useTickets } from './hooks/useTickets';
-import { createTicket, updateTicket } from './api/index';
+import { createTicket, updateTicket, setClerkTokenGetter } from './api/index';
 
 import TicketSidebar from './components/TicketSidebar';
 import TicketDetail from './components/TicketDetail';
@@ -9,6 +9,27 @@ import CreateTicketForm from './components/CreateTicketForm';
 import Dashboard from './components/Dashboard';
 
 export default function App() {
+  const { getToken } = useAuth();
+  
+  useEffect(() => {
+    setClerkTokenGetter(() => getToken());
+  }, [getToken]);
+
+  return (
+    <>
+      <SignedIn>
+        <CRMApp />
+      </SignedIn>
+      <SignedOut>
+        <div className="flex h-screen w-screen items-center justify-center bg-zinc-50">
+          <SignIn routing="hash" />
+        </div>
+      </SignedOut>
+    </>
+  );
+}
+
+function CRMApp() {
   const { 
     tickets, search, setSearch, statusFilter, setStatusFilter,
     activeTicketData, setActiveTicketData, isLoading, isLoadingTicket, loadTickets, loadActiveTicket

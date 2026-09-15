@@ -3,12 +3,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import { clerkMiddleware } from '@clerk/express';
 import ticketRoutes from './routes/ticketRoutes';
 import { errorHandler } from './middlewares/errorHandler';
 
 dotenv.config();
 
 const app = express();
+app.use(clerkMiddleware());
 const PORT = process.env.PORT || 3000;
 
 // 1. Security Headers (Helmet)

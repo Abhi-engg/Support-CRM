@@ -44,6 +44,8 @@ model Ticket {
   priority      Priority     @default(MEDIUM)
   sentiment     Sentiment?
   category      Category?
+  organizationId String?
+  userId        String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   

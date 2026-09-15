@@ -17,16 +17,21 @@ interface Props {
   hiddenOnMobile: boolean;
 }
 
+import { UserButton } from '@clerk/clerk-react';
+
 export default function TicketSidebar({ tickets, search, setSearch, statusFilter, setStatusFilter, activeTicketId, isCreating, isLoading, onSelectTicket, onCreateNew, hiddenOnMobile }: Props) {
   return (
     <div className={`w-full md:w-[420px] flex-col border-r border-zinc-200 bg-zinc-50/80 backdrop-blur-xl shrink-0 z-10 shadow-[1px_0_10px_rgba(0,0,0,0.02)] ${hiddenOnMobile ? 'hidden md:flex' : 'flex'}`}>
       <div className="p-4 md:p-6 pb-4">
         <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
-              <TicketIcon size={16} className="text-white" />
+          <div className="flex items-center gap-3">
+            <UserButton />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
+                <TicketIcon size={16} className="text-white" />
+              </div>
+              <h1 className="font-semibold text-lg tracking-tight text-zinc-900">Support-CRM</h1>
             </div>
-            <h1 className="font-semibold text-lg tracking-tight text-zinc-900">Datastraw</h1>
           </div>
           <button 
             onClick={onCreateNew}

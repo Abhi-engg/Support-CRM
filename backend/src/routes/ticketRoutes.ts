@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireAuth } from '@clerk/express';
 import {
   createTicket,
   getTickets,
@@ -7,6 +8,8 @@ import {
 } from '../controllers/ticketController';
 
 const router = Router();
+
+router.use(requireAuth());
 
 router.post('/', createTicket);
 router.get('/', getTickets);

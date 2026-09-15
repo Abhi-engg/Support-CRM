@@ -6,7 +6,8 @@ import { autoTriageTicket } from '../services/ai.service';
 export const createTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const validData = createTicketSchema.parse(req.body);
-    const ticket = await ticketService.createTicket(validData);
+    const auth = (req as any).auth || {};
+    const ticket = await ticketService.createTicket({ ...validData, userId: auth.userId, organizationId: auth.orgId });
     res.status(201).json({ ticket_id: ticket.ticketId, created_at: ticket.createdAt });
     
     // Asynchronously call AI triage
@@ -22,7 +23,8 @@ export const getTickets = async (req: Request, res: Response, next: NextFunction
   try {
     const status = req.query.status as string | undefined;
     const search = req.query.search as string | undefined;
-    const tickets = await ticketService.getTickets(status, search);
+    const auth = (req as any).auth || {};
+    const tickets = await ticketService.getTickets(auth.orgId, auth.userId, status, search);
     
     res.json(tickets.map(t => ({
       ticket_id: t.ticketId,
@@ -39,7 +41,8 @@ export const getTickets = async (req: Request, res: Response, next: NextFunction
 
 export const getTicketById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const ticket = await ticketService.getTicketById(req.params.id as string);
+    const auth = (req as any).auth || {};
+    const ticket = await ticketService.getTicketById(req.params.id as string, auth.orgId, auth.userId);
     res.json({
       ticket_id: ticket.ticketId,
       customer_name: ticket.customerName,
@@ -59,7 +62,8 @@ export const getTicketById = async (req: Request, res: Response, next: NextFunct
 export const updateTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const validData = updateTicketSchema.parse(req.body);
-    const updated = await ticketService.updateTicket(req.params.id as string, validData);
+    const auth = (req as any).auth || {};
+    const updated = await ticketService.updateTicket(req.params.id as string, validData, auth.orgId, auth.userId);
     res.json({ success: true, updated_at: updated.updatedAt });
   } catch (error) {
     next(error);

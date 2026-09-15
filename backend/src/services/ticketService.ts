@@ -10,6 +10,8 @@ export const createTicket = async (data: any) => {
       subject: data.subject,
       description: data.description,
       priority: data.priority || 'MEDIUM',
+      organizationId: data.organizationId || null,
+      userId: data.userId || null,
     }
   });
 
@@ -20,8 +22,14 @@ export const createTicket = async (data: any) => {
   });
 };
 
-export const getTickets = async (status?: string, search?: string) => {
+export const getTickets = async (orgId?: string, userId?: string, status?: string, search?: string) => {
   const whereClause: any = {};
+  if (orgId) {
+    whereClause.organizationId = orgId;
+  } else if (userId) {
+    whereClause.userId = userId;
+  }
+  
   if (status) whereClause.status = status;
   if (search) {
     const searchLower = search.toLowerCase();
@@ -45,17 +53,31 @@ export const getTickets = async (status?: string, search?: string) => {
   });
 };
 
-export const getTicketById = async (id: string) => {
-  const ticket = await prisma.ticket.findUnique({
-    where: { ticketId: id },
+export const getTicketById = async (id: string, orgId?: string, userId?: string) => {
+  const whereClause: any = { ticketId: id };
+  if (orgId) {
+    whereClause.organizationId = orgId;
+  } else if (userId) {
+    whereClause.userId = userId;
+  }
+
+  const ticket = await prisma.ticket.findFirst({
+    where: whereClause,
     include: { notes: true }
   });
   if (!ticket) throw new Error('Ticket not found');
   return ticket;
 };
 
-export const updateTicket = async (id: string, data: any) => {
-  const ticket = await prisma.ticket.findUnique({ where: { ticketId: id } });
+export const updateTicket = async (id: string, data: any, orgId?: string, userId?: string) => {
+  const whereClause: any = { ticketId: id };
+  if (orgId) {
+    whereClause.organizationId = orgId;
+  } else if (userId) {
+    whereClause.userId = userId;
+  }
+
+  const ticket = await prisma.ticket.findFirst({ where: whereClause });
   if (!ticket) throw new Error('Ticket not found');
 
   let finalNoteText = data.notes;
@@ -65,7 +87,7 @@ export const updateTicket = async (id: string, data: any) => {
   }
 
   return await prisma.ticket.update({
-    where: { ticketId: id },
+    where: { id: ticket.id },
     data: {
       ...(data.status && { status: data.status }),
       ...(data.priority && { priority: data.priority }),
