@@ -20,6 +20,19 @@ enum Priority {
   URGENT
 }
 
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
+enum Category {
+  BUG
+  FEATURE_REQUEST
+  BILLING
+  GENERAL
+}
+
 model Ticket {
   id            Int          @id @default(autoincrement())
   ticketId      String       @unique
@@ -29,6 +42,8 @@ model Ticket {
   description   String
   status        TicketStatus @default(OPEN)
   priority      Priority     @default(MEDIUM)
+  sentiment     Sentiment?
+  category      Category?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   

@@ -1,12 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import * as ticketService from '../services/ticketService';
 import { createTicketSchema, updateTicketSchema } from '../schemas/ticketSchemas';
+import { autoTriageTicket } from '../services/ai.service';
 
 export const createTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const validData = createTicketSchema.parse(req.body);
     const ticket = await ticketService.createTicket(validData);
     res.status(201).json({ ticket_id: ticket.ticketId, created_at: ticket.createdAt });
+    
+    // Asynchronously call AI triage
+    autoTriageTicket(ticket.ticketId, validData.description, !!validData.priority).catch(err => {
+      console.error("Background triage error:", err);
+    });
   } catch (error) {
     next(error);
   }
