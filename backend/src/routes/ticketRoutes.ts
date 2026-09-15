@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '@clerk/express';
+import { protectRoute } from '../middlewares/authMiddleware';
 import {
   createTicket,
   getTickets,
@@ -9,7 +9,7 @@ import {
 
 const router = Router();
 
-router.use(requireAuth());
+router.use(protectRoute);
 
 router.post('/', createTicket);
 router.get('/', getTickets);
