@@ -6,6 +6,7 @@ import { createTicket, updateTicket } from './api/index';
 import TicketSidebar from './components/TicketSidebar';
 import TicketDetail from './components/TicketDetail';
 import CreateTicketForm from './components/CreateTicketForm';
+import Dashboard from './components/Dashboard';
 
 export default function App() {
   const { 
@@ -89,12 +90,8 @@ export default function App() {
         ) : activeTicketData && activeTicketId === activeTicketData.ticket_id ? (
           <TicketDetail ticket={activeTicketData} isSubmitting={isSubmitting} isLoadingNotes={isLoadingTicket} onUpdate={handleUpdateSubmit} onBack={handleBackToQueue} />
         ) : (
-          <div className="hidden md:flex h-full flex-col items-center justify-center text-zinc-400">
-            <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mb-4 border border-zinc-100">
-              <TicketIcon size={32} className="text-zinc-300" />
-            </div>
-            <h2 className="text-lg font-medium text-zinc-600">No ticket selected</h2>
-            <p className="text-sm mt-1">Select a ticket from the queue or create a new one.</p>
+          <div className="hidden md:block h-full w-full">
+            <Dashboard tickets={tickets} />
           </div>
         )}
       </div>

@@ -99,4 +99,16 @@ npm run dev
 ```
 
 ---
+
+## 🚀 Production Roadmap (Next Steps)
+
+While this application was built as a highly functional MVP for demonstration purposes, taking it to a true enterprise production state would involve the following additions:
+
+1. **Authentication & RBAC:** Implement JWT-based authentication (e.g., Auth0 or NextAuth) to restrict endpoints and introduce Role-Based Access Control (Admin vs. Agent vs. Customer).
+2. **Automated Testing:** Implement a testing suite using **Jest** and **Supertest** for backend route coverage, and **Cypress/Playwright** for frontend E2E critical paths.
+3. **CI/CD Pipelines:** Wire up GitHub Actions to automatically run tests, linting, and Prisma migrations before allowing merges to the `main` branch.
+4. **Database Migrations:** Transition from `prisma db push` prototyping to formal `prisma migrate` version-controlled migrations for safe, zero-downtime database schema evolutions.
+5. **API Documentation:** Generate automated Swagger/OpenAPI documentation directly from the Zod validation schemas for easier onboarding of mobile/frontend engineers.
+
+---
 *Designed and built for the Datastraw Technologies Engineering Assessment.*
