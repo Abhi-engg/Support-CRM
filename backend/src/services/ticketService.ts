@@ -22,7 +22,7 @@ export const createTicket = async (data: any) => {
   });
 };
 
-export const getTickets = async (orgId?: string, userId?: string, status?: string, search?: string) => {
+export const getTickets = async (orgId?: string, userId?: string, status?: string, search?: string, email?: string) => {
   const authOrConditions = [];
   if (orgId) authOrConditions.push({ organizationId: orgId });
   if (userId) authOrConditions.push({ userId: userId });
@@ -36,6 +36,10 @@ export const getTickets = async (orgId?: string, userId?: string, status?: strin
 
   if (status) {
     whereClause.AND.push({ status: status });
+  }
+
+  if (email) {
+    whereClause.AND.push({ customerEmail: email });
   }
 
   if (search) {

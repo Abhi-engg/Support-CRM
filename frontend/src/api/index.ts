@@ -16,10 +16,11 @@ const getHeaders = async () => {
   return headers;
 };
 
-export const fetchTickets = async (search?: string, status?: string): Promise<Ticket[]> => {
+export const fetchTickets = async (search?: string, status?: string, email?: string): Promise<Ticket[]> => {
   const params = new URLSearchParams();
   if (search) params.append('search', search);
   if (status) params.append('status', status);
+  if (email) params.append('email', email);
   
   const res = await fetch(`${API_BASE_URL}/tickets?${params.toString()}`, {
     headers: await getHeaders()

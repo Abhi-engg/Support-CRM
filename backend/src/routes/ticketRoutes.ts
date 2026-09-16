@@ -6,10 +6,14 @@ import {
   getTicketById,
   updateTicket,
   smartReply,
-  summarizeThread
+  summarizeThread,
+  handleEmailWebhook
 } from '../controllers/ticketController';
 
 const router = Router();
+
+// Webhook endpoint (unprotected)
+router.post('/webhooks/email', handleEmailWebhook);
 
 router.use(protectRoute);
 
