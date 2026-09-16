@@ -20,10 +20,12 @@
     "express": "^4.21.2",
     "express-rate-limit": "^8.6.2",
     "helmet": "^8.3.0",
+    "node-cron": "^4.6.0",
     "typescript": "^5.7.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/node-cron": "^3.0.11",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2"
   },

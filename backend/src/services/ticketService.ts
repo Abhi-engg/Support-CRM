@@ -23,28 +23,37 @@ export const createTicket = async (data: any) => {
 };
 
 export const getTickets = async (orgId?: string, userId?: string, status?: string, search?: string) => {
-  const whereClause: any = {};
-  if (orgId) {
-    whereClause.organizationId = orgId;
-  } else if (userId) {
-    whereClause.userId = userId;
+  const authOrConditions = [];
+  if (orgId) authOrConditions.push({ organizationId: orgId });
+  if (userId) authOrConditions.push({ userId: userId });
+  authOrConditions.push({ userId: null, organizationId: null });
+
+  const whereClause: any = {
+    AND: [
+      { OR: authOrConditions }
+    ]
+  };
+
+  if (status) {
+    whereClause.AND.push({ status: status });
   }
-  
-  if (status) whereClause.status = status;
+
   if (search) {
     const searchLower = search.toLowerCase();
-    whereClause.OR = [
-      { ticketId: { contains: search, mode: 'insensitive' } },
-      { customerName: { contains: search, mode: 'insensitive' } },
-      { customerEmail: { contains: search, mode: 'insensitive' } },
-      { subject: { contains: search, mode: 'insensitive' } },
-      { description: { contains: search, mode: 'insensitive' } },
-      { ticketId: { contains: searchLower } },
-      { customerName: { contains: searchLower } },
-      { customerEmail: { contains: searchLower } },
-      { subject: { contains: searchLower } },
-      { description: { contains: searchLower } }
-    ];
+    whereClause.AND.push({
+      OR: [
+        { ticketId: { contains: search, mode: 'insensitive' } },
+        { customerName: { contains: search, mode: 'insensitive' } },
+        { customerEmail: { contains: search, mode: 'insensitive' } },
+        { subject: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { ticketId: { contains: searchLower } },
+        { customerName: { contains: searchLower } },
+        { customerEmail: { contains: searchLower } },
+        { subject: { contains: searchLower } },
+        { description: { contains: searchLower } }
+      ]
+    });
   }
 
   return await prisma.ticket.findMany({

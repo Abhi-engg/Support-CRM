@@ -66,3 +66,59 @@ Description: "${truncatedDescription}"
     console.error("AI Auto-Triage failed:", error);
   }
 };
+
+export const generateDraftResponse = async (description: string, notes: string[]): Promise<string> => {
+  if (!process.env.GEMINI_API_KEY) {
+    return 'AI services are not configured.';
+  }
+  
+  try {
+    const thread = `Description:\n${description}\n\nNotes:\n${notes.join('\n')}`.substring(0, 30000);
+    const prompt = `
+You are a professional and empathetic customer support agent. 
+Based on the following ticket description and internal notes thread, draft a response to the customer.
+The response should be helpful, clear, and professional.
+Do not include internal system notes or developer jargon unless necessary for the customer.
+
+Ticket Thread:
+${thread}
+
+Draft Response:
+`;
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.6-flash',
+      contents: prompt,
+    });
+    return response.text || 'Failed to generate response.';
+  } catch (error) {
+    console.error('AI Draft Response failed:', error);
+    throw new Error('Failed to generate draft response.');
+  }
+};
+
+export const summarizeTicketThread = async (description: string, notes: string[]): Promise<string> => {
+  if (!process.env.GEMINI_API_KEY) {
+    return 'AI services are not configured.';
+  }
+
+  try {
+    const thread = `Description:\n${description}\n\nNotes:\n${notes.join('\n')}`.substring(0, 30000);
+    const prompt = `
+Provide a concise TL;DR summary of the following support ticket thread. 
+Focus on the main issue, the troubleshooting steps taken, and the current status or next steps.
+
+Ticket Thread:
+${thread}
+
+TL;DR Summary:
+`;
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.6-flash',
+      contents: prompt,
+    });
+    return response.text || 'Failed to summarize thread.';
+  } catch (error) {
+    console.error('AI Summarization failed:', error);
+    throw new Error('Failed to summarize ticket thread.');
+  }
+};

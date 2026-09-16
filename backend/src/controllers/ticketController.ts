@@ -69,3 +69,29 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
+
+import { generateDraftResponse, summarizeTicketThread } from '../services/ai.service';
+
+export const smartReply = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const auth = (req as any).auth || {};
+    const ticket = await ticketService.getTicketById(req.params.id as string, auth.orgId, auth.userId);
+    const notesText = ticket.notes.map(n => n.text);
+    const draft = await generateDraftResponse(ticket.description, notesText);
+    res.json({ draft });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const summarizeThread = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const auth = (req as any).auth || {};
+    const ticket = await ticketService.getTicketById(req.params.id as string, auth.orgId, auth.userId);
+    const notesText = ticket.notes.map(n => n.text);
+    const summary = await summarizeTicketThread(ticket.description, notesText);
+    res.json({ summary });
+  } catch (error) {
+    next(error);
+  }
+};

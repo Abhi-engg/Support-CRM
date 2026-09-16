@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { clerkMiddleware } from '@clerk/express';
 import ticketRoutes from './routes/ticketRoutes';
 import { errorHandler } from './middlewares/errorHandler';
+import { initCronJobs } from './services/cron.service';
 
 dotenv.config();
 
@@ -40,6 +41,9 @@ app.get('/api/health', (req, res) => {
 
 // Centralized error handler
 app.use(errorHandler);
+
+// Initialize background jobs
+initCronJobs();
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

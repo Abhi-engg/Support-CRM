@@ -1,4 +1,4 @@
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, Sparkles } from 'lucide-react';
 
 interface Props {
   newNote: string;
@@ -9,6 +9,8 @@ interface Props {
   hasChanges: boolean;
   showSuccess: boolean;
   handleSave: () => void;
+  handleGenerateReply?: () => void;
+  isGeneratingReply?: boolean;
 }
 
 export default function TicketReplyForm({
@@ -19,12 +21,24 @@ export default function TicketReplyForm({
   isSubmitting,
   hasChanges,
   showSuccess,
-  handleSave
+  handleSave,
+  handleGenerateReply,
+  isGeneratingReply
 }: Props) {
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-      <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
+    <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden mt-6">
+      <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200 flex justify-between items-center">
         <h3 className="text-xs font-bold text-zinc-600 uppercase tracking-wider">Update Ticket</h3>
+        {handleGenerateReply && (
+          <button
+            onClick={handleGenerateReply}
+            disabled={isGeneratingReply || isSubmitting}
+            className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
+          >
+            {isGeneratingReply ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+            Generate AI Reply
+          </button>
+        )}
       </div>
       <div className="p-4">
         <div className="relative mb-4">
@@ -39,7 +53,7 @@ export default function TicketReplyForm({
                 if (hasChanges && !isSubmitting) handleSave();
               }
             }}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isGeneratingReply}
             className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-3 pb-8 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all resize-none disabled:opacity-50"
           ></textarea>
           
@@ -57,7 +71,7 @@ export default function TicketReplyForm({
             <select 
               value={updatingStatus}
               onChange={e => setUpdatingStatus(e.target.value)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isGeneratingReply}
               className="bg-transparent text-sm font-medium text-zinc-900 focus:outline-none cursor-pointer w-full disabled:opacity-50"
             >
               <option value="OPEN">Open</option>
@@ -74,7 +88,7 @@ export default function TicketReplyForm({
             )}
             <button 
               onClick={handleSave}
-              disabled={isSubmitting || !hasChanges}
+              disabled={isSubmitting || !hasChanges || isGeneratingReply}
               className="flex justify-center items-center gap-2 bg-zinc-900 text-white px-5 py-2.5 sm:py-2 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:pointer-events-none w-full sm:w-auto"
             >
               {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : null}

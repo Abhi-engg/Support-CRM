@@ -55,3 +55,21 @@ export const updateTicket = async (id: string, updates: { status?: string, prior
   if (!res.ok) throw new Error('Failed to update ticket');
   return res.json();
 };
+
+export const generateSmartReply = async (id: string): Promise<{ draft: string }> => {
+  const res = await fetch(`${API_BASE_URL}/tickets/${id}/smart-reply`, {
+    method: 'POST',
+    headers: await getHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to generate smart reply');
+  return res.json();
+};
+
+export const summarizeTicket = async (id: string): Promise<{ summary: string }> => {
+  const res = await fetch(`${API_BASE_URL}/tickets/${id}/summarize`, {
+    method: 'POST',
+    headers: await getHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to summarize ticket');
+  return res.json();
+};
