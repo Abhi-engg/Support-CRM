@@ -67,15 +67,16 @@ export const getTickets = async (orgId?: string, userId?: string, status?: strin
 };
 
 export const getTicketById = async (id: string, orgId?: string, userId?: string) => {
-  const whereClause: any = { ticketId: id };
-  if (orgId) {
-    whereClause.organizationId = orgId;
-  } else if (userId) {
-    whereClause.userId = userId;
-  }
+  const authOrConditions = [];
+  if (orgId) authOrConditions.push({ organizationId: orgId });
+  if (userId) authOrConditions.push({ userId: userId });
+  authOrConditions.push({ userId: null, organizationId: null });
 
   const ticket = await prisma.ticket.findFirst({
-    where: whereClause,
+    where: {
+      ticketId: id,
+      OR: authOrConditions
+    },
     include: { notes: true }
   });
   if (!ticket) throw new Error('Ticket not found');
@@ -83,14 +84,17 @@ export const getTicketById = async (id: string, orgId?: string, userId?: string)
 };
 
 export const updateTicket = async (id: string, data: any, orgId?: string, userId?: string) => {
-  const whereClause: any = { ticketId: id };
-  if (orgId) {
-    whereClause.organizationId = orgId;
-  } else if (userId) {
-    whereClause.userId = userId;
-  }
+  const authOrConditions = [];
+  if (orgId) authOrConditions.push({ organizationId: orgId });
+  if (userId) authOrConditions.push({ userId: userId });
+  authOrConditions.push({ userId: null, organizationId: null });
 
-  const ticket = await prisma.ticket.findFirst({ where: whereClause });
+  const ticket = await prisma.ticket.findFirst({
+    where: {
+      ticketId: id,
+      OR: authOrConditions
+    }
+  });
   if (!ticket) throw new Error('Ticket not found');
 
   let finalNoteText = data.notes;

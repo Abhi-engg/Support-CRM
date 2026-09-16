@@ -3,147 +3,164 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding realistic demo data...');
+  console.log('Seeding deeply realistic Enterprise CRM data...');
 
   // Clean existing data safely
   await prisma.note.deleteMany({});
   await prisma.ticket.deleteMany({});
 
   const now = new Date();
+  
+  // Timestamps for SLA demonstration
+  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const twentyFiveHoursAgo = new Date(now.getTime() - 25 * 60 * 60 * 1000); // Triggers 24h SLA breach
+  const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
   const fourHoursAgo = new Date(now.getTime() - 4 * 60 * 60 * 1000);
-  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+  const thirtyMinsAgo = new Date(now.getTime() - 30 * 60 * 1000); // Triggers URGENT breach if untouched
+  const tenMinsAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
-  const demoTickets = [
+  // We set userId: null and organizationId: null so they are globally visible 
+  // to the user testing the app, acting as a shared "Demo" queue.
+
+  const ticketsToCreate = [
     {
-      ticketId: 'TKT-001',
+      ticketId: 'TKT-101',
       customerName: 'Saurabh Agarwal',
-      customerEmail: 'saurabh.a@example.com',
-      subject: 'Urgent: Production Dashboard not loading',
-      description: 'Hi support team,\n\nSince this morning, the main analytics dashboard is throwing a 500 error when I try to filter by Q3 metrics. I need this resolved before the board meeting tomorrow.\n\nBest,\nSaurabh',
+      customerEmail: 'saurabh.a@datastraw.com',
+      subject: 'Critical: Enterprise Dashboard 500 Errors',
+      description: 'The executive analytics dashboard is completely down. We are getting a 500 Internal Server Error when filtering by Q3 metrics. I need this escalated to engineering immediately before our board meeting.',
       status: 'IN_PROGRESS',
       priority: 'URGENT',
-      createdAt: oneDayAgo,
-      updatedAt: oneHourAgo,
+      category: 'BUG',
+      sentiment: 'NEGATIVE',
+      createdAt: fourHoursAgo,
+      updatedAt: tenMinsAgo,
+      notes: [
+        { text: 'System: Ticket was auto-triaged by AI. Priority: URGENT, Sentiment: NEGATIVE, Category: BUG', createdAt: fourHoursAgo },
+        { text: 'Status updated from OPEN to IN_PROGRESS.\n\nNote: Acknowledged. I am looping in the backend engineering team right now. - Agent Smith', createdAt: new Date(fourHoursAgo.getTime() + 15 * 60 * 1000) },
+        { text: 'Internal Engineering Note: The issue seems to be a missing index on the Q3_metrics Postgres view. Running a migration on staging now.', createdAt: oneHourAgo(fourHoursAgo) },
+        { text: 'Hi Saurabh, we have identified the issue and are deploying a hotfix. Expected resolution in 30 minutes.', createdAt: tenMinsAgo }
+      ]
     },
     {
-      ticketId: 'TKT-002',
+      ticketId: 'TKT-102',
       customerName: 'Priya Sharma',
       customerEmail: 'psharma@habpharma.in',
-      subject: 'Need access to the new HR portal',
-      description: 'I recently transferred to the operations team and do not have access to the new HR portal. Can someone provision my account?',
+      subject: 'SSO Login Failure for Operations Team',
+      description: 'Several members of the operations team are getting a "SAML Token Invalid" error when trying to log into the new portal via Okta.',
       status: 'OPEN',
-      priority: 'MEDIUM',
-      createdAt: twoDaysAgo, // Will trigger SLA breach UI
-      updatedAt: twoDaysAgo,
+      priority: 'HIGH',
+      category: 'BUG',
+      sentiment: 'NEGATIVE',
+      createdAt: twentyFiveHoursAgo, // INTENTIONAL SLA BREACH (Open > 24h)
+      updatedAt: twentyFiveHoursAgo,
+      notes: [
+        { text: 'System: Ticket was auto-triaged by AI. Priority: HIGH, Sentiment: NEGATIVE, Category: LOGIN', createdAt: twentyFiveHoursAgo },
+        { text: 'SYSTEM ALERT: SLA BREACH. Ticket has been open for >24 hours with no agent response. Priority auto-escalated.', createdAt: now }
+      ]
     },
     {
-      ticketId: 'TKT-003',
+      ticketId: 'TKT-103',
       customerName: 'Marcus Johnson',
       customerEmail: 'mjohnson@techcorp.com',
       subject: 'API Rate Limit exceeded on our production key',
       description: 'We are seeing 429 Too Many Requests errors. Our traffic has not spiked. Did our quota get reset accidentally?',
       status: 'OPEN',
-      priority: 'HIGH',
-      createdAt: fourHoursAgo,
-      updatedAt: fourHoursAgo,
+      priority: 'URGENT',
+      category: 'BILLING',
+      sentiment: 'NEUTRAL',
+      createdAt: thirtyMinsAgo, // INTENTIONAL URGENT BREACH (Urgent untouched > 30m)
+      updatedAt: thirtyMinsAgo,
+      notes: [
+        { text: 'System: Ticket was auto-triaged by AI. Priority: URGENT, Sentiment: NEUTRAL, Category: BILLING', createdAt: thirtyMinsAgo },
+        { text: 'SYSTEM ALERT: CRITICAL SLA BREACH. Urgent ticket untouched for 30 minutes. Manager notified.', createdAt: now }
+      ]
     },
     {
-      ticketId: 'TKT-004',
+      ticketId: 'TKT-104',
       customerName: 'Elena Rodriguez',
       customerEmail: 'elena.r@agency.co',
       subject: 'Billing discrepancy on invoice #9923',
       description: 'We were charged for 15 seats this month but we downgraded to 10 seats last month. Please advise and process a refund.',
       status: 'CLOSED',
-      priority: 'HIGH',
-      createdAt: twoDaysAgo,
+      priority: 'MEDIUM',
+      category: 'BILLING',
+      sentiment: 'NEGATIVE',
+      createdAt: threeDaysAgo,
       updatedAt: oneDayAgo,
+      notes: [
+        { text: 'System: Ticket was auto-triaged by AI. Priority: MEDIUM, Sentiment: NEGATIVE, Category: BILLING', createdAt: threeDaysAgo },
+        { text: 'Status updated from OPEN to IN_PROGRESS.\n\nNote: Checking the Stripe logs for last month\'s proration.', createdAt: twoDaysAgo },
+        { text: 'Status updated from IN_PROGRESS to CLOSED.\n\nNote: I have processed a $150 credit to your account for the 5 unused seats. The updated invoice is attached.', createdAt: oneDayAgo },
+        { text: 'System: Automated CSAT Survey dispatched to elena.r@agency.co', createdAt: oneDayAgo }
+      ]
     },
     {
-      ticketId: 'TKT-005',
+      ticketId: 'TKT-105',
       customerName: 'Amit Patel',
       customerEmail: 'apatel@retail.net',
       subject: 'Feature Request: Export reports to CSV',
       description: 'It would save us hours of manual work if we could click a single button to export the weekly inventory report to CSV.',
       status: 'OPEN',
       priority: 'LOW',
-      createdAt: oneDayAgo,
-      updatedAt: oneDayAgo,
+      category: 'FEATURE_REQUEST',
+      sentiment: 'POSITIVE',
+      createdAt: twelveHoursAgo,
+      updatedAt: twelveHoursAgo,
+      notes: [
+        { text: 'System: Ticket was auto-triaged by AI. Priority: LOW, Sentiment: POSITIVE, Category: FEATURE_REQUEST', createdAt: twelveHoursAgo }
+      ]
     },
     {
-      ticketId: 'TKT-006',
-      customerName: 'David Chen',
-      customerEmail: 'dchen@startup.io',
-      subject: 'Mobile app crashing on iOS 17.1',
-      description: 'Every time I try to upload a receipt using the mobile app on my iPhone 15 Pro, the app crashes instantly.',
-      status: 'IN_PROGRESS',
-      priority: 'HIGH',
-      createdAt: fourHoursAgo,
-      updatedAt: oneHourAgo,
-    },
-    {
-      ticketId: 'TKT-007',
-      customerName: 'Neha Gupta',
-      customerEmail: 'ngupta@example.com',
-      subject: 'How do I reset my 2FA backup codes?',
-      description: 'I lost my phone and need to use my backup codes, but I cannot find where I saved them. Can you help me reset them?',
-      status: 'CLOSED',
-      priority: 'MEDIUM',
-      createdAt: twoDaysAgo,
-      updatedAt: twoDaysAgo,
-    },
-    {
-      ticketId: 'TKT-008',
-      customerName: 'Michael Scott',
-      customerEmail: 'mscott@dundermifflin.com',
-      subject: 'Printer configuration issues',
-      description: 'The new office printer is not connecting to the guest Wi-Fi network. Need IT support ASAP.',
+      ticketId: 'TKT-106',
+      customerName: 'Elena Rodriguez', // Same customer to test Customer 360 sidebar
+      customerEmail: 'elena.r@agency.co',
+      subject: 'How to invite guest users?',
+      description: 'Is it possible to invite a contractor to our workspace with read-only permissions?',
       status: 'OPEN',
-      priority: 'MEDIUM',
-      createdAt: oneHourAgo,
-      updatedAt: oneHourAgo,
+      priority: 'LOW',
+      category: 'GENERAL',
+      sentiment: 'NEUTRAL',
+      createdAt: tenMinsAgo,
+      updatedAt: tenMinsAgo,
+      notes: [
+        { text: 'System: Ticket was auto-triaged by AI. Priority: LOW, Sentiment: NEUTRAL, Category: GENERAL', createdAt: tenMinsAgo }
+      ]
     }
   ];
 
-  for (const t of demoTickets) {
+  for (const t of ticketsToCreate) {
+    const { notes, ...ticketData } = t;
     const ticket = await prisma.ticket.create({
       data: {
-        ticketId: t.ticketId,
-        customerName: t.customerName,
-        customerEmail: t.customerEmail,
-        subject: t.subject,
-        description: t.description,
-        status: t.status as any,
-        priority: t.priority as any,
-        createdAt: t.createdAt,
-        updatedAt: t.updatedAt,
+        ...ticketData,
+        status: ticketData.status as any,
+        priority: ticketData.priority as any,
+        category: ticketData.category as any,
+        sentiment: ticketData.sentiment as any,
+        userId: null,
+        organizationId: null
       }
     });
 
-    // Add some realistic notes if not open
-    if (t.status === 'IN_PROGRESS') {
+    for (const note of notes) {
       await prisma.note.create({
         data: {
           ticketId: ticket.id,
-          text: 'Status updated from OPEN to IN_PROGRESS.\n\nNote: I am looking into the server logs right now. Will update shortly.',
-          createdAt: t.updatedAt
-        }
-      });
-    }
-
-    if (t.status === 'CLOSED') {
-      await prisma.note.create({
-        data: {
-          ticketId: ticket.id,
-          text: 'Status updated from IN_PROGRESS to CLOSED.\n\nNote: Issue has been resolved and verified with the customer.',
-          createdAt: t.updatedAt
+          text: note.text,
+          createdAt: note.createdAt
         }
       });
     }
   }
 
-  console.log('Database seeded with 8 realistic tickets!');
+  console.log('Database seeded with highly realistic Enterprise CRM tickets!');
+}
+
+function oneHourAgo(date: Date) {
+  return new Date(date.getTime() + 60 * 60 * 1000);
 }
 
 main()
