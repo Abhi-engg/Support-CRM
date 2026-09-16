@@ -66,11 +66,31 @@ export const generateSmartReply = async (id: string): Promise<{ draft: string }>
   return res.json();
 };
 
-export const summarizeTicket = async (id: string): Promise<{ summary: string }> => {
+export const summarizeTicketStream = async (id: string, onChunk: (text: string) => void): Promise<void> => {
   const res = await fetch(`${API_BASE_URL}/tickets/${id}/summarize`, {
     method: 'POST',
     headers: await getHeaders()
   });
-  if (!res.ok) throw new Error('Failed to summarize ticket');
-  return res.json();
+  if (!res.ok) throw new Error('Failed to start stream');
+  const reader = res.body?.getReader();
+  if (!reader) return;
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const parts = buffer.split('\n\n');
+    buffer = parts.pop() || '';
+    for (const part of parts) {
+      if (part.startsWith('data: ')) {
+        const dataStr = part.slice(6);
+        if (dataStr === '[DONE]') return;
+        try {
+          const data = JSON.parse(dataStr);
+          if (data.text) onChunk(data.text);
+        } catch(e) {}
+      }
+    }
+  }
 };

@@ -81,7 +81,7 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-import { generateDraftResponse, summarizeTicketThread } from '../services/ai.service';
+import { generateDraftResponse, summarizeTicketThread, summarizeTicketThreadStream } from '../services/ai.service';
 
 export const smartReply = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -100,10 +100,23 @@ export const summarizeThread = async (req: Request, res: Response, next: NextFun
     const auth = (req as any).auth || {};
     const ticket = await ticketService.getTicketById(req.params.id as string, auth.orgId, auth.userId);
     const notesText = ticket.notes.map(n => n.text);
-    const summary = await summarizeTicketThread(ticket.description, notesText);
-    res.json({ summary });
+    
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    
+    const stream = await summarizeTicketThreadStream(ticket.description, notesText);
+    for await (const chunk of stream) {
+      if (chunk.text) {
+        res.write(`data: ${JSON.stringify({ text: chunk.text })}\n\n`);
+      }
+    }
+    res.write('data: [DONE]\n\n');
+    res.end();
   } catch (error) {
-    next(error);
+    console.error("Streaming error:", error);
+    res.write(`data: ${JSON.stringify({ error: 'Failed to generate summary' })}\n\n`);
+    res.end();
   }
 };
 
