@@ -3,7 +3,8 @@ import type { Ticket } from '../types/index';
 import TicketHeader from './TicketHeader';
 import TicketTimeline from './TicketTimeline';
 import TicketReplyForm from './TicketReplyForm';
-import { generateSmartReply, summarizeTicket, fetchTickets } from '../api';
+import { generateSmartReply, summarizeTicketStream, fetchTickets } from '../api';
+import ReactMarkdown from 'react-markdown';
 import { Sparkles, Loader2, User, Star, Receipt } from 'lucide-react';
 
 interface Props {
