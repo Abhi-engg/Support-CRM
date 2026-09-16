@@ -109,7 +109,6 @@ Before adding AI, the app needs to securely handle real companies.
 
 * **Multi-Tenancy & Auth:** Integrated Clerk Auth. We modified the Prisma schema so every ticket belongs to an OrganizationId. This allows multiple different companies to use the CRM securely without seeing each other's data.
 * **Role-Based Access Control (RBAC):** Added roles: Admin, Agent, and Customer. Customers can only view their own tickets; Agents see the queue.
-* **Omnichannel Ingestion (Email):** (Planned) Integrate Nylas or SendGrid Inbound Parse. When a customer emails support@yourcompany.com, a webhook fires to our Node backend, and we automatically parse the email and create a Ticket in the database.
 
 ### Phase 2: Automation (The Impact)
 Real CRMs save time by removing manual clicks.
@@ -128,6 +127,15 @@ This is where we destroy legacy competitors. We integrated the Gemini API direct
   * *Impact:* Reduces average handle time (AHT) from 10 minutes to 30 seconds.
 * **Auto-Summarization:**
   * *How it works:* If a ticket has numerous back-and-forth messages, reading it takes 10 minutes. We added a '✨ Summarize Thread' button that uses AI to summarize the entire thread into 3 bullet points for the next agent taking over the shift.
+
+### Phase 4: Enterprise CRM Core (Table Stakes for B2B)
+* **Customer 360 Sidebar:**
+  * *The Feature:* When an agent views a ticket, a sidebar shows the customer's entire history: their lifetime value (LTV), subscription tier (Free vs. Pro), and a list of their past tickets.
+  * *PM Value:* Agents treat a "Pro" customer differently than a "Free" customer. Without this context, agents are flying blind.
+* **Omnichannel "Email-to-Ticket":**
+  * *The Feature:* Connect SendGrid or Postmark so that when a customer simply emails support@yourcompany.com, it automatically parses the email and drops it into our CRM as a ticket. No web forms required.
+* **CSAT (Customer Satisfaction) Automation:**
+  * *The Feature:* When an agent clicks "Close Ticket", the system automatically emails the customer a 1-to-5 star rating survey.
 
 ---
 *Designed and built for the Datastraw Technologies Engineering Assessment.*
